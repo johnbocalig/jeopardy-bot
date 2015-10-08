@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Jeopardy Canvas Board</title>
+    <script type="text/javascript" src="https://code.createjs.com/easeljs-0.8.1.min.js"></script>
+    <style media="screen">
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="jeopardy" width="1280" height="720"></canvas>
+
+    <script>
+
+    window.onload = function() {
+      'use strict';
+
+      var ctx = document.getElementById('jeopardy').getContext('2d');
+
+      const width = 1280;
+      const height = 720;
+      const categories = 6;
+
+      const cellRadius = 7;
+      const cellPadding = 7;
+
+      //Create a stage by getting a reference to the canvas
+      var stage = new createjs.Stage('jeopardy');
+
+      // Make the background black:
+      var background = new createjs.Shape();
+      background.graphics.beginFill('black').drawRect(0, 0, width, height);
+      stage.addChild(background);
+
+      function createCell(offset) {
+        const cellWidth = ((width - cellPadding - (cellPadding * categories)) / categories);
+        const cellHeight = 100;
+        const offsetX = (cellWidth * offset) + (cellPadding * (offset + 1));
+        const offsetY = cellPadding;
+
+        //Create a Shape DisplayObject.
+        var cell = new createjs.Shape();
+        cell.graphics.beginFill('#162387').drawRoundRect(offsetX, offsetY, cellWidth, cellHeight, cellRadius);
+        return {
+          cell,
+          cellWidth,
+          cellHeight,
+          offsetX,
+          offsetY
+        };
+      }
+
+      function getLines(ctx, phrase, maxPxLength, textStyle) {
+          var wa = phrase.split(' '),
+              phraseArray=[],
+              lastPhrase=wa[0],
+              l=maxPxLength,
+              measure=0;
+
+          // Force the font:
+          ctx.font = textStyle;
+
+          for (var i = 1; i <= wa.length; i++) {
+              var w = wa[i];
+              measure = ctx.measureText(lastPhrase + w).width;
+              if (measure < l) {
+                  lastPhrase += (' ' + w);
+              }else {
+                  phraseArray.push(lastPhrase);
+                  lastPhrase=w;
+              }
+              if (i === wa.length - 1) {
+                  phraseArray.push(lastPhrase);
+                  break;
+              }
+          }
+          return phraseArray;
+      }
+
+      function createCategory(title, offset) {
+        //Create a Shape DisplayObject.
+        var c = createCell(offset);
+        var category = c.cell;
+
+        //Add Shape instance to stage display list.
+        stage.addChild(category);
+
+        title = title.toUpperCase();
+        var lines = getLines(ctx, title, (c.cellWidth - (cellPadding * 2)), '30px Arial');
+
+        var container = new createjs.Container();
+        lines.forEach((line, i) => {
+          var text = new createjs.Text(line, "30px League Gothic", 'white');
+          text.shadow = new createjs.Shadow('rgba(0, 0, 0, 0.6)', 2, 2, 3);
+          text.textAlign = 'center';
+          text.textBaseline = 'hanging';
+          text.y = (i * 28);
+
+          container.addChild(text);
+        });
+
+        var b = container.getBounds();
+        container.x = c.offsetX + (c.cellWidth / 2);
+        container.y = c.offsetY + (c.cellHeight / 2) - (b.height / 2);
+
+        stage.addChild(container);
+      }
+
+      createCategory('Hello world! I love you!', 0);
+      createCategory('This is another category!', 1);
+      createCategory('"L.B."S.', 2);
+      createCategory('Historical Faces', 3);
+      createCategory('Strange Places With U', 4);
+      createCategory('Does This Work', 5);
+
+      //Update stage will render next frame
+      stage.update();
+    }
+
+    </script>
+
+  </body>
+</html>
