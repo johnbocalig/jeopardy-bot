@@ -1,7 +1,7 @@
 const url = require('url');
 
 // Stolen from src/config:
-const MONGO = process.env.MONGO_URL || process.env.MONGOHQ_URL || process.env.MONGOLAB_URI || 'mongodb://localhost/jeopardy';
+const MONGO = process.env.MONGO_URL || process.env.MONGOHQ_URL || process.env.MONGODB_URI || 'mongodb://localhost/jeopardy';
 
 const parsedUrl = url.parse(MONGO);
 const auth = {};
